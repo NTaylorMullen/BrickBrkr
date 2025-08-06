@@ -112,13 +112,46 @@ function collisionDetection() {
         for (let r = 0; r < brickInfo.rows; r++) {
             const b = bricks[c][r];
             if (b.status === 1) {
+                // Ball bounding box
+                const ballLeft = ball.x - ball.radius;
+                const ballRight = ball.x + ball.radius;
+                const ballTop = ball.y - ball.radius;
+                const ballBottom = ball.y + ball.radius;
+
+                // Brick bounding box
+                const brickLeft = b.x;
+                const brickRight = b.x + brickInfo.width;
+                const brickTop = b.y;
+                const brickBottom = b.y + brickInfo.height;
+
+                // Check for overlap
                 if (
-                    ball.x > b.x &&
-                    ball.x < b.x + brickInfo.width &&
-                    ball.y > b.y &&
-                    ball.y < b.y + brickInfo.height
+                    ballRight > brickLeft &&
+                    ballLeft < brickRight &&
+                    ballBottom > brickTop &&
+                    ballTop < brickBottom
                 ) {
-                    ball.dy = -ball.dy;
+                    // Determine collision side
+                    const overlapLeft = ballRight - brickLeft;
+                    const overlapRight = brickRight - ballLeft;
+                    const overlapTop = ballBottom - brickTop;
+                    const overlapBottom = brickBottom - ballTop;
+                    const minOverlap = Math.min(overlapLeft, overlapRight, overlapTop, overlapBottom);
+
+                    if (minOverlap === overlapLeft) {
+                        ball.x = brickLeft - ball.radius;
+                        ball.dx = -ball.dx;
+                    } else if (minOverlap === overlapRight) {
+                        ball.x = brickRight + ball.radius;
+                        ball.dx = -ball.dx;
+                    } else if (minOverlap === overlapTop) {
+                        ball.y = brickTop - ball.radius;
+                        ball.dy = -ball.dy;
+                    } else if (minOverlap === overlapBottom) {
+                        ball.y = brickBottom + ball.radius;
+                        ball.dy = -ball.dy;
+                    }
+
                     b.status = 0;
                 }
             }
